@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <script src="/static/js/jquery-3.2.1.min.js"></script>
+    </head>
+    <body>
+        <form id="selectIndex">
+            <label>Select an index</label>
+            <select id="indexes">
+                <option value=""></option>
+            </select>
+        </form>
+
+        <div id="mapping">
+
+        </div>
+
+
+
+        <script>
+            var textFile;
+            $(function() {
+                $.get( "/indexes", function(data) {
+                  $.parseJSON(data).forEach(function(n,i){
+                    $('#indexes').append($('<option>', {
+                      value: n,
+                      text: n
+                    }));
+                  });
+                });
+            });
+
+            $( "#indexes" ).change(function() {
+              var selIndex = $("#indexes option:selected").val();
+              $.get( "/indexdef/"+selIndex, function(data) {
+                $("#mapping").empty();
+                printTables(data);
+              });
+            });
+
+            function printTables(data){
+                $.parseJSON(data).forEach(function(n,i){
+                    var indexType = n["indexType"];
+                    $("#mapping").append("<h4>"+indexType+"</h4>");
+                    var headers = "<thead><th>Field</th><th>Pie Chart</th><th>Bar Chart</th><th>Label</th></thead>";
+                    $("#mapping").append("<table class='mappingtable' idxType='"+indexType+"'>"+headers+"</table>");
+                    var fields = n["fields"];
+                    fields.forEach(function(field,j){
+                        var line = "<tr><td>"+field["name"]+" ("+field["fieldType"]+")</td><td><input type='checkbox' field='"+field["name"]+"' fieldType='"+field["fieldType"]+"' chart='pie' /></td><td><input type='checkbox' field='"+field["name"]+"' fieldType='"+field["fieldType"]+"' chart='bar' checked /></td><td><input type='checkbox' field='"+field["name"]+"' label/></td></tr>";
+                        $("table[idxType="+indexType+"]").append(line);
+                    });
+
+                    $("#mapping").append("<input type='button' id='generate' value='G&eacute;n&eacute;rer' />");
+
+                    $("#generate").on('click', function(){
+                        var mappedArr = [];
+                        $("#mapping input[chart]:checked").map(function(){
+                          mappedArr.push('{"field":"'+$(this).attr("field")+'","chart":"'+$(this).attr("chart")+'","fieldType":"'+$(this).attr("fieldType")+'"}');
+                        });
+
+                        var mapped = '['+mappedArr.join(',')+']';
+                        var index = $("#indexes option:selected").val();
+                        var label = $("#mapping input[label]:checked").attr("field");
+                        var data = '{"index":"'+index+'","viz":'+mapped+',"label":"'+label+'"}';
+
+                        $.ajax({
+                          type: "POST",
+                          url: "/generate",
+                          data: data,
+                          success: function(response){
+                            var a = document.createElement('a');
+                            a.style = "display: none";
+                            var fileData = new Blob([response], {type: 'text/plain'});
+                            if (textFile !== null) {
+                              window.URL.revokeObjectURL(textFile);
+                            }
+                            textFile = window.URL.createObjectURL(fileData);
+
+                            a.href = textFile;
+                            a.download = "vizualisations.json";
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                          }
+                        });
+                    });
+                    //one and only one label should be selected
+                });
+            }
+        </script>
+    </body>
+
+</html>
