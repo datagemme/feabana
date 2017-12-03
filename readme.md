@@ -30,7 +30,7 @@ Feabana will retrieve the existing indexes / aliases on Elasticsearch for you (f
 
 You'll simply have to choose for which features / label you want to generate graphs and the graph type. (Only supporting BarChart & PieChart for now).
 
-[[https://github.com/datagemme/feabana/blob/master/blob/img/Feabana.png]]
+![Feabana](blob/img/Feabana.png "Feabana screenshot")
 
 # Build from sources
 
