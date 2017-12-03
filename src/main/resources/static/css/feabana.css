@@ -1,0 +1,15 @@
+table{
+    text-align: center;
+}
+
+table tr > td:first-child{
+  text-align: left;
+}
+
+table tr{
+    height: 25px;
+}
+
+table td{
+  min-width: 100px;
+}

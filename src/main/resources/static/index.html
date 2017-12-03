@@ -1,5 +1,6 @@
 <html>
-    <head>
+    <link>
+        <link rel="stylesheet" type="text/css" href="/static/css/feabana.css" />
         <script src="/static/js/jquery-3.2.1.min.js"></script>
     </head>
     <body>
@@ -11,6 +12,10 @@
         </form>
 
         <div id="mapping">
+
+        </div>
+
+        <div id="error">
 
         </div>
 
@@ -40,7 +45,7 @@
             function printTables(data){
                 $.parseJSON(data).forEach(function(n,i){
                     var indexType = n["indexType"];
-                    $("#mapping").append("<h4>"+indexType+"</h4>");
+                    $("#mapping").append("<h4><i>Index type : "+indexType+"</i></h4>");
                     var headers = "<thead><th>Field</th><th>Pie Chart</th><th>Bar Chart</th><th>Label</th></thead>";
                     $("#mapping").append("<table class='mappingtable' idxType='"+indexType+"'>"+headers+"</table>");
                     var fields = n["fields"];
@@ -49,7 +54,7 @@
                         $("table[idxType="+indexType+"]").append(line);
                     });
 
-                    $("#mapping").append("<input type='button' id='generate' value='G&eacute;n&eacute;rer' />");
+                    $("#mapping").append("<input type='button' id='generate' value='Generate' />");
 
                     $("#generate").on('click', function(){
                         var mappedArr = [];
@@ -61,6 +66,12 @@
                         var index = $("#indexes option:selected").val();
                         var label = $("#mapping input[label]:checked").attr("field");
                         var data = '{"index":"'+index+'","viz":'+mapped+',"label":"'+label+'"}';
+
+                        if($("#mapping input[label]:checked").length > 1){
+                            $("#error").html("<p style='color:red;'>Error : multiple labels selected</p>");
+                            setTimeout(function(){ $("#error").empty(); }, 3000);
+                            return;
+                        }
 
                         $.ajax({
                           type: "POST",
@@ -83,7 +94,8 @@
                           }
                         });
                     });
-                    //one and only one label should be selected
+
+
                 });
             }
         </script>
